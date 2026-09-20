@@ -15,7 +15,6 @@ Return valid JSON only.
 Do not use Markdown or code fences.
 Do not add fields outside the required schema.
 Do not invent or alter facts, numbers, line numbers, timestamps, sources, or messages.
-Do not invent or alter facts, numbers, line numbers, timestamps, sources, or messages.
 Do not treat an observed error, warning, or symptom as its own root cause.
 Do not introduce systems, services, components, or technologies that are not named in the evidence.
 
@@ -56,6 +55,9 @@ Evidence:
 
 
 def validate_result(result):
+    if not isinstance(result, dict):
+        return False
+
     required_fields = {
         "observations",
         "possible_root_causes",
@@ -153,7 +155,7 @@ def main():
                     print("-------------")
                     print(f"Performance stats {MODEL}: {data.get('stats')}")
                 else:
-                    print("LLM response fauled validation")
+                    print("LLM response failed validation")
                 break
 
 if __name__ == "__main__":

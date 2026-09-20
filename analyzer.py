@@ -27,7 +27,6 @@ def parse_line(line):
     }
 
 
-
 def load_log(log_file):
     with open(log_file) as f:
         for number, line in enumerate(f, start=1):
@@ -35,7 +34,11 @@ def load_log(log_file):
 
             if not line:
                 continue
-            record = parse_line(line)
+            try:
+                record = parse_line(line)
+            except ValueError:
+                continue
+
             record["line_number"] = number
 
             yield record
@@ -97,8 +100,8 @@ def build_evidence(analysis):
 
     source_stats = get_source_stats(analysis["serious_records"])
     top_sources = sorted(source_stats.items(), key=lambda x: x[1], reverse=True)[:5]
-    message_evidence = get_message_evidence(analysis["serious_records"], top_messages,)
 
+    message_evidence = get_message_evidence(analysis["serious_records"], top_messages,)
     top_sources = [{"source": source, "count": count} for source, count in top_sources]
 
     return {

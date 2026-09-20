@@ -74,21 +74,19 @@ python -m pip install -r requirements.txt
 
 ## Usage
 
-Start the model in LM Studio, then run:
-
-```bash
-python main.py
-```
-
-The application analyses the Hadoop 2k dataset from LogHub.
-
 Place the downloaded dataset at:
 
 ```text
 logs/hadoop_2k.log
 ```
 
-and produces an L3-style investigation report.
+Start the model in LM Studio, then run:
+
+```bash
+python main.py
+```
+
+The application analyses the Hadoop 2k dataset from LogHub and produces an L3-style investigation report.
 
 ## Testing
 
