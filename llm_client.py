@@ -20,7 +20,8 @@ def ask_llm(prompt):
         return data, MODEL
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
-        return None
+        return None, MODEL
     except ValueError as e:
         print("Invalid JSON response:", e)
-        return None
+        return None, MODEL
+
