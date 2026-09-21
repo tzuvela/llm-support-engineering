@@ -2,69 +2,71 @@
 
 A small Python project exploring how local LLMs can assist with software support and incident investigation.
 
-## v0.2 — AI Log Investigator
+## v0.3 - AI Log Investigator with RAG
 
-The application analyses a Hadoop log dataset, extracts a compact evidence package, and sends that evidence to a local LLM running through LM Studio.
+The application analyses a public Hadoop log dataset and uses a local LLM to help investigate issues.
 
-The design principle is:
+v0.3 adds a small RAG knowledge base using Hadoop documentation, allowing the LLM to use relevant background information alongside the log evidence.
 
-> **Deterministic code extracts evidence; the LLM interprets it.**
+### Main features
 
-The LLM returns a structured investigation containing:
+- Python-based log analysis
+- Structured evidence extraction
+- Local LLM inference through LM Studio
+- Semantic search using embeddings
+- Local RAG knowledge base
+- Structured JSON LLM output
+- Basic validation of LLM responses
 
-- observations
-- possible root causes
-- confidence levels
-- supporting evidence
-- unknowns
-- recommended checks
+## Screenshot
 
-Python then parses and validates the structured response before presenting it as an engineer-facing report.
-
-## Architecture
-
-```text
-Log file
-   ↓
-Deterministic analyzer
-   ↓
-Compact evidence
-   ↓
-Local LLM
-   ↓
-Structured JSON
-   ↓
-Python validation
-   ↓
-Engineer-facing investigation
-```
+![AI Log Investigator output](docs/images/v0.3-output.jpg)
 
 ## Model
 
-Development and testing were performed with:
+Development and testing used:
 
 - LM Studio
 - Qwen 3.5 4B
+- `text-embedding-nomic-embed-text-v1.5`
 - 8192-token context
 - reasoning enabled
 
-A Qwen 3.5 2B model was also tested. The 4B model produced more useful and better-grounded investigation results, at the cost of lower inference speed.
+A smaller Qwen 3.5 2B model was also tested.
 
-## Example Output
+## Knowledge base
 
-![AI Log Investigator v0.2 output](docs/images/v0.2-output.jpg)
+The current knowledge base contains a small amount of Hadoop documentation:
+
+```text
+knowledge/
+├── yarn.md
+├── hdfs.md
+└── index.json
+```
+
+The knowledge base is intentionally small for the current version and will be expanded in future versions.
 
 ## Dataset
 
-The example log is the public Hadoop 2k dataset from LogHub.
+The project uses the public **Hadoop 2k** dataset from LogHub.
 
-No private or proprietary support logs are included in this repository.
+Place the dataset at:
+
+```text
+logs/Hadoop_2k.log
+```
+
+The dataset is not included in the repository.
+
+No private or proprietary support logs are included.
 
 ## Requirements
 
 - Python 3.11+
 - LM Studio
-- A local compatible LLM
+- Compatible local LLM
+- Compatible embedding model
 
 Install dependencies:
 
@@ -74,51 +76,60 @@ python -m pip install -r requirements.txt
 
 ## Usage
 
-Place the downloaded dataset at:
+Build the knowledge index:
 
-```text
-logs/hadoop_2k.log
+```bash
+python ingest.py
 ```
 
-Start the model in LM Studio, then run:
+Run the investigator:
 
 ```bash
 python main.py
 ```
 
-The application analyses the Hadoop 2k dataset from LogHub and produces an L3-style investigation report.
-
-## Testing
-
-Run:
+Run tests:
 
 ```bash
 python -m pytest
 ```
-
-The current test suite covers the deterministic log-analysis functions.
 
 ## Project structure
 
 ```text
 llm-support-engineering/
 ├── analyzer.py
+├── ingest.py
+├── retriever.py
 ├── llm_client.py
 ├── main.py
+├── knowledge/
 ├── logs/
 ├── tests/
-├── .gitignore
+├── docs/
 ├── requirements.txt
 └── README.md
 ```
 
-## What's next
+## Version history
 
-Planned future versions will explore:
+### v0.1
 
-- hallucination and grounding evaluation
-- retrieval-augmented generation (RAG)
-- historical incidents and runbooks
-- tool calling
-- Kubernetes, metrics, and API investigation
-- an AI incident copilot
+Local LLM CLI.
+
+### v0.2
+
+AI Log Investigator with deterministic log analysis and structured LLM output.
+
+### v0.3
+
+Added semantic retrieval and a local RAG knowledge base using embeddings.
+
+## Future work
+
+- Expand the knowledge base
+- Improve hallucination and grounding evaluation
+- Add historical incidents and runbooks
+- Tool calling for logs, metrics, APIs and Kubernetes
+- Streaming LLM output
+- AI incident copilot
