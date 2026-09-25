@@ -1,4 +1,4 @@
-from analyzer import parse_line, load_log
+from analyzer import parse_line, load_log, search_log
 
 def test_parse_line_basic():
     line = (
@@ -52,3 +52,20 @@ def test_load_log_skips_malformed_line(tmp_path):
     assert len(records) == 2
     assert records[0]["line_number"] == 1
     assert records[1]["line_number"] == 3
+
+
+def test_search_log_find_matching_lines(tmp_path):
+    log_file = tmp_path / "test.log"
+
+    log_file.write_text(
+        "INFO [main] something happened\n"
+        "ERROR IN CONTACTING RM.\n"
+        "INFO [main] another event\n"
+        "ERROR IN CONTACTING RM.\n"
+    )
+
+    matches = search_log(log_file, "ERROR IN CONTACTING RM")
+
+    assert len(matches) == 2
+    assert matches[0]["line_number"] == 2
+    assert matches[1]["line_number"] == 4

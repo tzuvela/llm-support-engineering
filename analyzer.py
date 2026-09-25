@@ -68,6 +68,21 @@ def analyze_log(log_file):
     }
 
 
+def search_log(log_file, query):
+    matches = []
+
+    with open(log_file, encoding="utf-8") as f:
+        for number, line in enumerate(f, start=1):
+            line = line.rstrip("\r\n")
+
+            if query in line:
+                matches.append({
+                    "line_number": number,
+                    "line": line,
+                    })
+    return matches
+
+
 def get_message_stats(records):
     messages = {}
 
