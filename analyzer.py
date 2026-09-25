@@ -36,7 +36,7 @@ def load_log(log_file):
                 continue
             try:
                 record = parse_line(line)
-            except ValueError:
+            except (ValueError, IndexError):
                 continue
 
             record["line_number"] = number
