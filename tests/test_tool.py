@@ -1,6 +1,7 @@
+import json
 import pytest
 
-from tools import execute_tool
+from tools import execute_tool, build_tool_result_message
 
 
 def test_execute_tool_search_log(tmp_path):
@@ -36,3 +37,20 @@ def test_execute_unknown_tool():
 
     with pytest.raises(ValueError, match="Unknown tool: unknown_tool"):
         execute_tool(tool_call, "logs/Hadoop_2k.log")
+
+
+def test_build_tool_result_message():
+    tool_call = {"id": "test-call-123"}
+    results = [
+        {"line_number": 10, "line": "ERROR one"},
+        {"line_number": 20, "line": "ERROR two"},
+    ]
+
+    message = build_tool_result_message(tool_call, results)
+
+    assert message["role"] == "tool"
+    assert message["tool_call_id"] == "test-call-123"
+
+    content = json.loads(message["content"])
+    assert content["match_count"] == 2
+    assert content["matches"] == results

@@ -36,15 +36,15 @@ def execute_tool(tool_call, log_file):
 
     raise ValueError(f"Unknown tool: {function_name}")
 
-if __name__ == "__main__":
-    test_call = {
-        "function": {
-            "name": "search_log",
-            "arguments": '{"query":"ERROR IN CONTACTING RM."}'
-        }
+
+def build_tool_result_message(tool_call, results):
+    tool_result = {
+        "match_count": len(results),
+        "matches": results[:5],
     }
 
-    results = execute_tool(test_call, "logs/Hadoop_2k.log")
-
-    print("Matches:", len(results))
-    print("First match:", results[0])
+    return {
+        "role": "tool",
+        "tool_call_id": tool_call["id"],
+        "content": json.dumps(tool_result)
+    }
