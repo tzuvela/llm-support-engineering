@@ -1,30 +1,9 @@
 import json
-
 from analyzer import analyze_log, build_evidence
-from llm_client import ask_llm
+import agent
 import retriever
 
 INDEX_PATH = "knowledge/index.json"
-
-TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_log",
-            "description": " Search the log file for lines containing a query string.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "Text to search for in the log.",
-                    },
-                },
-                "required": ["query"],
-            },
-        },
-    },
-]
 
 
 def build_prompt(evidence, retrieved_chunks):
@@ -46,6 +25,9 @@ Analyze the log evidence below.
 Use only the log evidence and retrieved knowledge provided below.
 Treat log evidence as factual evidence about this incident.
 Treat retrieved knowledge as background context only; do not present information from it as a fact about this specific incident unless the log evidence supports it.
+You have access to a search_log tool that can inspect the original log file.
+Use it when additional raw log evidence would help investigate the incident.
+Treat results returned by the tool as incident evidence.
 
 Return valid JSON only.
 Do not use Markdown or code fences.
@@ -202,20 +184,27 @@ def main():
 
     prompt = build_prompt(evidence, retrieved_chunks)
 
-    data, MODEL = ask_llm(prompt)
+    messages = [
+        {"role": "user", "content": prompt}
+    ]
+    response = agent.run_tool_loop(messages, log_file)
 
-    if data is not None:
-        for item in data["output"]:
-            if item.get("type") == "message":
-                result = json.loads(item["content"])
+    if response is None:
+        print("LLM investigation failed")
+        return
 
-                if validate_result(result):
-                    print_result(result)
-                    print("-------------")
-                    print(f"Performance stats {MODEL}: {data.get('stats')}")
-                else:
-                    print("LLM response failed validation")
-                break
+    content = response["choices"][0]["message"]["content"]
+    try:
+        result = json.loads(content)
+    except (TypeError, json.JSONDecodeError):
+        print("LLM response was not valid JSON")
+        return
+
+    if validate_result(result):
+        print_result(result)
+    else:
+        print("LLM response failed validation")
+
 
 if __name__ == "__main__":
     main()

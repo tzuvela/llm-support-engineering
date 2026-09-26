@@ -4,6 +4,8 @@ import tools
 
 def run_tool_loop(messages, log_file):
     response = llm_client.chat_completion(messages, tools.TOOLS)
+    if response is None:
+        return None
 
     while True:
         message = response["choices"][0]["message"]
@@ -25,3 +27,5 @@ def run_tool_loop(messages, log_file):
             )
 
         response = llm_client.chat_completion(messages)
+        if response is None:
+            return None
