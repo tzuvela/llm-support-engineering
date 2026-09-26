@@ -6,6 +6,26 @@ import retriever
 
 INDEX_PATH = "knowledge/index.json"
 
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_log",
+            "description": " Search the log file for lines containing a query string.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Text to search for in the log.",
+                    },
+                },
+                "required": ["query"],
+            },
+        },
+    },
+]
+
 
 def build_prompt(evidence, retrieved_chunks):
     evidence_json = json.dumps(evidence, indent=2)
