@@ -25,13 +25,13 @@ def run_tool_loop(messages, log_file):
 
     response = llm_client.chat_completion(messages, tools.TOOLS)
     if response is None:
-        stats["elapsed_seconds"] = time.perf_Counter() - start_time
+        stats["elapsed_seconds"] = time.perf_counter() - start_time
         return None, stats
     update_stats(stats, response)
 
     while True:
         message = response["choices"][0]["message"]
-        tool_calls = message["tool_calls"]
+        tool_calls = message.get("tool_calls", [])
 
         if not tool_calls:
             stats["elapsed_seconds"] = time.perf_counter() - start_time
@@ -50,8 +50,8 @@ def run_tool_loop(messages, log_file):
                 tools.build_tool_result_message(tool_call, results)
             )
 
-        response = llm_client.chat_completion(messages)
+        response = llm_client.chat_completion(messages, tools.TOOLS)
         if response is None:
-            stats["elapsed_seconds"] = time.perf_counter - start_time
+            stats["elapsed_seconds"] = time.perf_counter() - start_time
             return None, stats
         update_stats(stats, response)
