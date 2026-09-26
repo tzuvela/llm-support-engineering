@@ -2,25 +2,60 @@
 
 A small Python project exploring how local LLMs can assist with software support and incident investigation.
 
-## v0.3 - AI Log Investigator with RAG
+## v0.4 - AI Incident Investigator with RAG and Tool Calling
 
-The application analyses a public Hadoop log dataset and uses a local LLM to help investigate issues.
+The application analyses a public Hadoop log dataset and uses a local LLM to investigate incidents.
 
-v0.3 adds a small RAG knowledge base using Hadoop documentation, allowing the LLM to use relevant background information alongside the log evidence.
+v0.4 adds LLM tool calling, allowing the model to request additional evidence from the original log through a controlled Python tool.
 
 ### Main features
 
-- Python-based log analysis
+- Python-based deterministic log analysis
 - Structured evidence extraction
 - Local LLM inference through LM Studio
 - Semantic search using embeddings
 - Local RAG knowledge base
+- LLM tool calling
+- Deterministic `search_log()` tool
+- Agent loop for tool requests and results
 - Structured JSON LLM output
 - Basic validation of LLM responses
+- Focused pytest coverage
 
-## Screenshot
+## Tool-calling architecture
 
-![AI Log Investigator output](docs/images/v0.3-output.jpg)
+```text
+main.py
+  │
+  ├── analyzer.py      log analysis and evidence
+  ├── retriever.py     semantic retrieval / RAG
+  └── agent.py         LLM <> tool loop
+        │
+        ├── llm_client.py   LM Studio communication
+        └── tools.py         tool definitions / dispatch
+                │
+                └── analyzer.py
+```
+
+The LLM decides when additional log evidence is needed.
+
+Python executes the requested tool deterministically and returns the result to the LLM.
+
+## Tool-calling flow
+
+```text
+LLM
+ ->
+tool request
+ ->
+Python executes search_log()
+ ->
+tool result
+ ->
+LLM interprets the evidence
+ ->
+structured investigation result
+```
 
 ## Model
 
@@ -36,8 +71,6 @@ A smaller Qwen 3.5 2B model was also tested.
 
 ## Knowledge base
 
-The current knowledge base contains a small amount of Hadoop documentation:
-
 ```text
 knowledge/
 ├── yarn.md
@@ -45,7 +78,7 @@ knowledge/
 └── index.json
 ```
 
-The knowledge base is intentionally small for the current version and will be expanded in future versions.
+The knowledge base is intentionally small for the current version.
 
 ## Dataset
 
@@ -99,10 +132,12 @@ python -m pytest
 ```text
 llm-support-engineering/
 ├── analyzer.py
+├── agent.py
 ├── ingest.py
-├── retriever.py
 ├── llm_client.py
 ├── main.py
+├── retriever.py
+├── tools.py
 ├── knowledge/
 ├── logs/
 ├── tests/
@@ -110,6 +145,10 @@ llm-support-engineering/
 ├── requirements.txt
 └── README.md
 ```
+
+## Screenshot
+
+![AI Log Investigator output](docs/images/v0.4-output.jpg)
 
 ## Version history
 
@@ -125,11 +164,15 @@ AI Log Investigator with deterministic log analysis and structured LLM output.
 
 Added semantic retrieval and a local RAG knowledge base using embeddings.
 
+### v0.4
+
+Added controlled LLM tool calling, a deterministic log search tool, and an agent loop for retrieving additional incident evidence.
+
 ## Future work
 
-- Expand the knowledge base
 - Improve hallucination and grounding evaluation
 - Add historical incidents and runbooks
-- Tool calling for logs, metrics, APIs and Kubernetes
+- Add additional investigation tools such as contextual log retrieval
+- Explore metrics and Kubernetes tools
 - Streaming LLM output
 - AI incident copilot

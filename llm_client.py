@@ -1,9 +1,9 @@
-import argparse
 import requests
 
 API_URL = "http://localhost:1234/api/v1/chat"
 CHAT_API_URL = "http://localhost:1234/v1/chat/completions"
 MODEL = "qwen3.5-4b"
+
 
 
 def ask_llm(prompt):
